@@ -23,19 +23,90 @@ SNP <- read_csv("PINE_NFDR_Jan-Mar_2010.csv")
 
 ```{r}
 
+flashy_northeast<-flashy %>%
+  filter(AGGECOREGION == "NorthEast")
+
+mean_NE<-mean(flashy_northeast$PPTAVG_BASIN)
+median_NE<-median(flashy_northeast$PPTAVG_BASIN)
+sd_NE<-sd(flashy_northeast$PPTAVG_BASIN)
+IQR_NE<-IQR(flashy_northeast$PPTAVG_BASIN)
+
+flashy_northeast %>%
+  # filter(AGGECOREGION == "NorthEast") %>%
+  ggplot(aes(PPTAVG_BASIN)) +
+  stat_density()+
+  geom_vline(xintercept = mean_NE , color ="red")+
+  geom_vline(xintercept = median_NE , color ="blue")+
+  geom_vline(xintercept = mean_NE+IQR_NE , color ="green")+
+  geom_vline(xintercept = mean_NE-IQR_NE , color ="green")+
+  geom_vline(xintercept = mean_NE+sd_NE , color ="orange")+
+  geom_vline(xintercept = mean_NE-sd_NE , color ="orange")
+  
+  # geom_vline(xintercept = mean(PPTAVG_BASIN) , color ="red")+
+  # geom_vline(xintercept = median(PPTAVG_BASIN) , color ="blue")
+  # 
+
+
 ```
 
 ## 3. Perform a Shapiro-Wilk test for normality on the data from question 2. Using the results from that test and the plot and stats from question 2, discuss whether or not the distribution is normal.
 
 ```{r}
+
+shapiro.test(flashy$PPTAVG_BASIN)
+
+
 ```
+P Value is above 0.05. Normally distributed.
 
 ## 4. Make a plot that shows the distribution of the data from the PINE watershed and the NFDR watershed (two pdfs on the same plot). Log the x axis.
 
 ```{r}
+ggplot(SNP, aes(x = cfs, fill= StationID))+
+  stat_density()+
+  scale_x_log10()
 
 ```
 
 ## 5. You want to compare how variable the discharge is in each of the watersheds in question 4. Which measure of spread would you use and why? If you wanted to measure the central tendency which measure would you use and why?
 
+For checking the varability, measures like standard deviation, Variance, IQR and qualtiles can be used. These parameters show the devation from the mean value and reports information for general spread/deviation of data.
+
+For checking central tendency, mean and median could be used. These parameters  provide a single value for representing the the whole data. 
+
+
+
 ## 6. Compute 3 measures of spread and 2 measures of central tendency for the PINE and NFDR watershed. (hint: use group_by() and summarize()) Be sure your code outputs the result. Which watershed has higher flow? Which one has more variable flow? How do you know?
+
+
+## Measures of spread and sum (For higher flow)
+```{r}
+
+
+summary <- SNP %>%
+  group_by (StationID) %>%
+  summarise(SD = sd(cfs),
+            VAR = var(cfs),
+            IQR = IQR(cfs),
+            sum = sum(cfs)
+            )
+summary
+```
+
+## Measures of central tendency
+```{r}
+
+
+summary <- SNP %>%
+  group_by (StationID) %>%
+  summarise(
+            Mean = mean(cfs),
+            Median = median(cfs)
+            )
+summary
+```
+
+
+Pine has more variable data.  SD, variance and IQR is more for Pine data.
+Pine also has higher flow due to more sum. 
+
